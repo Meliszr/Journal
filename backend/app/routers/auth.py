@@ -1,29 +1,14 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, EmailStr, field_validator
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import text
 from datetime import date
-from sqlalchemy import create_engine, text
-from auth import hash_password  # your hash functions
 
-DATABASE_URL = "postgresql://localhost/journal_db"
-engine = create_engine(DATABASE_URL)
+from app.core.database import engine
+from app.schemas.user import UserRegister
+from app.utils.security import hash_password
 
-app = FastAPI()
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
-class UserRegister(BaseModel):
-    email: EmailStr
-    password: str
-    username: str | None = None
-    birthdate: str | None = None  # ⬅️ Now stored as string, not date
-
-    @field_validator("birthdate", mode="before")
-    def clean_birthdate(cls, v):
-        # Swagger sends "string" when field is blank → ignore it
-        if v in (None, "", "string"):
-            return None
-        return v
-
-@app.post("/register")
+@router.post("/register")
 def register(user: UserRegister):
     hashed = hash_password(user.password)
 
@@ -52,4 +37,3 @@ def register(user: UserRegister):
             raise HTTPException(status_code=400, detail="Email already registered")
 
     return {"message": "User created successfully"}
-
