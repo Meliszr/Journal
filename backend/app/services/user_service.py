@@ -17,8 +17,6 @@ def register_user(db: Session, email: str, password: str, username: str | None, 
     hashed = hash_password(password)
     user = create_user(db, email, hashed, username, birthdate_value)
     return user
-
-
 def login_user(db: Session, email: str, password: str):
     user = get_user_by_email(db, email)
     if not user:

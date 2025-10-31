@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.security import isUserReal
-from app.repositories.entry_repository import addEntryToDb, getEntryFromDb
+from app.repositories.entry_repository import addEntryToDb, getEntryFromDb, getAllEntriesFromDb, deleteEntryFromDb
 from app.schemas.entry_schema import EntryCreate
 
 
@@ -29,3 +29,25 @@ def getEntry(db: Session, userId: int, entryId: int):
     else:
         return entry
 
+def getAllEntries(db: Session, userId: int):
+
+    if(isUserReal(db, userId) == False):
+        raise HTTPException(status_code=404, detail=(
+            "User not found"
+        ))
+
+    entries = getAllEntriesFromDb(db, userId)
+    if (entries == False):
+        raise HTTPException(status_code=404, detail=(
+            "Entry not found"
+        ))
+    else:
+        return entries
+
+def deleteEntry(db, userId: int, entryId: int):
+    if not isUserReal(db, userId):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    deleted = deleteEntryFromDb(db, userId, entryId)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Entry not found or not authorized to delete")

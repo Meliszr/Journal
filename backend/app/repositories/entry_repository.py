@@ -19,3 +19,21 @@ def addEntryToDb(db: Session, entry: EntryCreate):
 def getEntryFromDb(db: Session, userId: int, entryId: int):
     return db.query(Entry).filter(Entry.id == entryId, Entry.user_id == userId,
                                   Entry.is_deleted == False).first()
+
+def getAllEntriesFromDb(db: Session, userId: int):
+    return db.query(Entry).filter(Entry.user_id == userId, Entry.is_deleted == False).all()
+
+def deleteEntryFromDb(db, userId: int, entryId: int):
+    entry = db.query(Entry).filter(
+        Entry.id == entryId,
+        Entry.user_id == userId,
+        Entry.is_deleted == False
+    ).first()
+
+    if not entry:
+        return False
+
+    # Soft delete
+    entry.is_deleted = True
+    db.commit()
+    return True
