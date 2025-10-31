@@ -15,3 +15,7 @@ def addEntryToDb(db: Session, entry: EntryCreate):
     db.commit()
     db.refresh(entrySecure)
     return entrySecure
+
+def getEntryFromDb(db: Session, userId: int, entryId: int):
+    return db.query(Entry).filter(Entry.id == entryId, Entry.user_id == userId,
+                                  Entry.is_deleted == False).first()
