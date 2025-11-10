@@ -1,6 +1,8 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 from app.models.entry_model import Entry
 from app.schemas.entry_schema import EntryCreate
+from zoneinfo import ZoneInfo
 
 #from app.models. import User
 
@@ -37,3 +39,21 @@ def deleteEntryFromDb(db, userId: int, entryId: int):
     entry.is_deleted = True
     db.commit()
     return True
+
+def updateEntryInDb(db: Session, userId: int, entryId: int, entry: EntryCreate):
+    entrySecure = db.query(Entry).filter(
+        Entry.id == entryId,
+        Entry.user_id == userId,
+        Entry.is_deleted == False
+    ).first()
+
+    if not entrySecure:
+        return None
+
+    entrySecure.title = entry.title
+    entrySecure.content = entry.content
+    entrySecure.updated_at = datetime.now(ZoneInfo("Europe/Vienna")) #change later to utc or something
+
+    db.commit()
+    db.refresh(entrySecure)
+    return entrySecure

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
 from app.schemas.entry_schema import EntryCreate
-from app.services.entry_service import addEntry, getEntry, getAllEntries, deleteEntry
+from app.services.entry_service import addEntry, getEntry, getAllEntries, deleteEntry, update_Entry
 from app.core.database import get_db
 
 router = APIRouter(prefix="/entries", tags=["Entry"])
@@ -25,3 +25,8 @@ def getAll(userId: int, db: Session = Depends(get_db)):
 def delete_entry(entry_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
     deleteEntry(db, user.id, entry_id)
     return {"message": "Entry deleted successfully"}
+
+@router.post("update/{entry_id}")
+def updateEntry(entry: EntryCreate, entryId, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    update_Entry(db, user.id, entryId, entry)
+    return {"message": "Entry updated successfully"}
